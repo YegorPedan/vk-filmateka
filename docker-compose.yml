@@ -1,0 +1,21 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: greenpoo
+      POSTGRES_PASSWORD: my-super-secret-key
+      POSTGRES_DB: filmoteka
+
+  goapp:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      CONFIG_PATH: ./config/prod.yaml
+  

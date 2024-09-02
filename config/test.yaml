@@ -1,0 +1,16 @@
+env: "test"
+api_key: "super-puper-test-key"
+access_token_time: "1s"
+refresh_token_time: "2s"
+admin_name: "green"
+admin_password: "SuperHorosh4142"
+http_server:
+  address: "localhost:5000"
+  timeout: 4s
+  idle_timeout: 30s
+postgres:
+  host: "localhost"
+  port: 5432
+  user: "greenpoo"
+  password: "root"
+  dbname: "vk-filmoteka"

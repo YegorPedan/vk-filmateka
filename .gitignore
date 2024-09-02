@@ -1,0 +1,5 @@
+.idea
+.vscode
+/database.db
+dev.yaml*
+prod.yaml*

@@ -1,0 +1,518 @@
+definitions:
+  aggregate.ActorAggregate:
+    properties:
+      actor:
+        $ref: '#/definitions/model.Actor'
+      films:
+        items:
+          $ref: '#/definitions/model.Film'
+        type: array
+    type: object
+  aggregate.FilmAggregate:
+    properties:
+      actors:
+        items:
+          $ref: '#/definitions/model.Actor'
+        type: array
+      film:
+        $ref: '#/definitions/model.Film'
+    type: object
+  appDto.ActorGetByQueryResult:
+    properties:
+      actors:
+        items:
+          $ref: '#/definitions/aggregate.ActorAggregate'
+        type: array
+      pageCount:
+        type: integer
+    type: object
+  appDto.CreateActorUseCaseDto:
+    properties:
+      birthday:
+        type: string
+      gender:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 1
+        type: string
+    required:
+    - birthday
+    - gender
+    - name
+    type: object
+  appDto.CreateFilmUseCaseDto:
+    properties:
+      description:
+        maxLength: 1000
+        type: string
+      name:
+        maxLength: 150
+        minLength: 1
+        type: string
+      rate:
+        maximum: 10
+        minimum: 0
+        type: number
+      release:
+        type: string
+    required:
+    - name
+    - release
+    type: object
+  appDto.FilmGetByQueryResult:
+    properties:
+      films:
+        items:
+          $ref: '#/definitions/aggregate.FilmAggregate'
+        type: array
+      pageCount:
+        type: integer
+    type: object
+  appDto.LoginUseCaseDto:
+    properties:
+      name:
+        maxLength: 100
+        minLength: 3
+        type: string
+      password:
+        maxLength: 35
+        minLength: 8
+        type: string
+    required:
+    - name
+    - password
+    type: object
+  appDto.RegistrationUseCaseDto:
+    properties:
+      name:
+        maxLength: 100
+        minLength: 3
+        type: string
+      password:
+        maxLength: 35
+        minLength: 8
+        type: string
+    required:
+    - name
+    - password
+    type: object
+  appDto.ResponseUserDto:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      role:
+        type: string
+    type: object
+  appErrors.ResponseError:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  dto.AddFilmToActorDto:
+    properties:
+      actorId:
+        type: string
+      filmIds:
+        items:
+          type: string
+        type: array
+    required:
+    - actorId
+    - filmIds
+    type: object
+  model.Actor:
+    properties:
+      birhday:
+        type: string
+      gender:
+        type: string
+      id:
+        type: string
+      name:
+        maxLength: 100
+        minLength: 1
+        type: string
+    required:
+    - birhday
+    - gender
+    - id
+    - name
+    type: object
+  model.Film:
+    properties:
+      description:
+        maxLength: 1000
+        type: string
+      id:
+        type: string
+      name:
+        maxLength: 150
+        minLength: 1
+        type: string
+      rate:
+        maximum: 10
+        minimum: 0
+        type: number
+      release:
+        type: string
+    required:
+    - id
+    - name
+    - release
+    type: object
+info:
+  contact: {}
+  description: This is a sample HTTP package with Swagger annotations.
+  title: VK-Filmoteka
+  version: "1.0"
+paths:
+  /http/v1/actor:
+    delete:
+      consumes:
+      - application/json
+      description: Доступно только админам, ничего ответом не возвращает
+      parameters:
+      - description: id удаляемого пользователья
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Ошибка 404
+          schema:
+            $ref: '#/definitions/appErrors.ResponseError'
+      summary: Удаление актера [Админы]
+      tags:
+      - actor
+    get:
+      consumes:
+      - application/json
+      description: Можно задавать разные query
+      parameters:
+      - description: текущая страница
+        in: query
+        name: page
+        type: string
+      - description: кол-во актеров на странице
+        in: query
+        name: page-count
+        type: string
+      - description: Вернуть вместе со связями (film)
+        in: query
+        name: connection
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: получаемые актеры
+          schema:
+            $ref: '#/definitions/appDto.ActorGetByQueryResult'
+        "404":
+          description: Ошибка 404
+          schema:
+            $ref: '#/definitions/appErrors.ResponseError'
+      summary: Получение актера
+      tags:
+      - actor
+    post:
+      consumes:
+      - application/json
+      description: Доступно только админам
+      parameters:
+      - description: Данные актера
+        in: body
+        name: reg
+        required: true
+        schema:
+          $ref: '#/definitions/appDto.CreateActorUseCaseDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные созданного актера
+          schema:
+            $ref: '#/definitions/model.Actor'
+        "404":
+          description: Ошибка 404
+          schema:
+            $ref: '#/definitions/appErrors.ResponseError'
+      summary: Создание актера [Админы]
+      tags:
+      - actor
+    put:
+      consumes:
+      - application/json
+      description: Доступно только админам
+      parameters:
+      - description: Данные актера
+        in: body
+        name: reg
+        required: true
+        schema:
+          $ref: '#/definitions/model.Actor'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные актера
+          schema:
+            $ref: '#/definitions/model.Actor'
+        "404":
+          description: Ошибка 404
+          schema:
+            $ref: '#/definitions/appErrors.ResponseError'
+      summary: Обновление актера [Админы]
+      tags:
+      - actor
+  /http/v1/actor/add-film:
+    post:
+      consumes:
+      - application/json
+      description: Доступно только админам
+      parameters:
+      - description: Данные id для связывания актера и фильма
+        in: body
+        name: reg
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AddFilmToActorDto'
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Ошибка 404
+          schema:
+            $ref: '#/definitions/appErrors.ResponseError'
+      summary: Обновление актера [Админы]
+      tags:
+      - actor
+  /http/v1/auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Ответом при успешном Логине получаем свои данные
+      parameters:
+      - description: Данные пользователя
+        in: body
+        name: login
+        required: true
+        schema:
+          $ref: '#/definitions/appDto.LoginUseCaseDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные пользователя
+          schema:
+            $ref: '#/definitions/appDto.ResponseUserDto'
+        "404":
+          description: Ошибка 404
+          schema:
+            $ref: '#/definitions/appErrors.ResponseError'
+      summary: Логин пользователя
+      tags:
+      - auth
+  /http/v1/auth/logout:
+    get:
+      consumes:
+      - application/json
+      description: Ответом ничего не получает. Чистится куки
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Ошибка 404
+          schema:
+            $ref: '#/definitions/appErrors.ResponseError'
+      summary: Обновление access токена пользователя
+      tags:
+      - auth
+  /http/v1/auth/refresh:
+    post:
+      consumes:
+      - application/json
+      description: Ответом при успешном Логине получаем свои данные
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные созданного пользователя
+          schema:
+            $ref: '#/definitions/appDto.ResponseUserDto'
+        "404":
+          description: Ошибка 404
+          schema:
+            $ref: '#/definitions/appErrors.ResponseError'
+      summary: Обновление access токена пользователя
+      tags:
+      - auth
+  /http/v1/auth/registration:
+    post:
+      consumes:
+      - application/json
+      description: Ответом при успешном регистрация получаем свои данные
+      parameters:
+      - description: Данные нового пользователя
+        in: body
+        name: reg
+        required: true
+        schema:
+          $ref: '#/definitions/appDto.RegistrationUseCaseDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные созданного пользователя
+          schema:
+            $ref: '#/definitions/appDto.ResponseUserDto'
+        "404":
+          description: Ошибка 404
+          schema:
+            $ref: '#/definitions/appErrors.ResponseError'
+      summary: Регистрация пользователя
+      tags:
+      - auth
+  /http/v1/film:
+    delete:
+      consumes:
+      - application/json
+      description: Доступно только админам, ничего не возвоащает
+      parameters:
+      - description: id удаляемого фильма
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "404":
+          description: Ошибка 404
+          schema:
+            $ref: '#/definitions/appErrors.ResponseError'
+      summary: Создание фильма [Админы]
+      tags:
+      - film
+    get:
+      consumes:
+      - application/json
+      description: Можно задавать разные query
+      parameters:
+      - description: текущая страница
+        in: query
+        name: page
+        type: string
+      - description: кол-во актеров на странице
+        in: query
+        name: page-count
+        type: string
+      - description: Вернуть вместе со связями (film)
+        in: query
+        name: connection
+        type: string
+      - description: asc либо desc
+        in: query
+        name: order-by
+        type: string
+      - description: поле по которому сортируют (rate, name, release_date)
+        in: query
+        name: order-field
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: получаемые фильмы
+          schema:
+            $ref: '#/definitions/appDto.FilmGetByQueryResult'
+        "404":
+          description: Ошибка 404
+          schema:
+            $ref: '#/definitions/appErrors.ResponseError'
+      summary: Получение фильма
+      tags:
+      - film
+    post:
+      consumes:
+      - application/json
+      description: Доступно только админам
+      parameters:
+      - description: Данные фильма
+        in: body
+        name: reg
+        required: true
+        schema:
+          $ref: '#/definitions/appDto.CreateFilmUseCaseDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные созданного фильма
+          schema:
+            $ref: '#/definitions/model.Film'
+        "404":
+          description: Ошибка 404
+          schema:
+            $ref: '#/definitions/appErrors.ResponseError'
+      summary: Создание фильма [Админы]
+      tags:
+      - film
+    put:
+      consumes:
+      - application/json
+      description: Доступно только админам
+      parameters:
+      - description: Данные фильма
+        in: body
+        name: reg
+        required: true
+        schema:
+          $ref: '#/definitions/model.Film'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Данные обновленного фильма
+          schema:
+            $ref: '#/definitions/model.Film'
+        "404":
+          description: Ошибка 404
+          schema:
+            $ref: '#/definitions/appErrors.ResponseError'
+      summary: Создание фильма [Админы]
+      tags:
+      - film
+  /http/v1/film/search:
+    get:
+      consumes:
+      - application/json
+      description: поиск по имени и имени актеров
+      parameters:
+      - description: параметр поиска
+        in: query
+        name: search
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: получаемые фильмы
+          schema:
+            $ref: '#/definitions/appDto.FilmGetByQueryResult'
+        "404":
+          description: Ошибка 404
+          schema:
+            $ref: '#/definitions/appErrors.ResponseError'
+      summary: Поиск фильма
+      tags:
+      - film
+swagger: "2.0"

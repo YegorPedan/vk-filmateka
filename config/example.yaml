@@ -1,0 +1,16 @@
+env: "prod"
+api_key: "dsafd87gf78ds6tfd8fj89reafy9d78fyda80fdjasf9dsafhdh087haf6daf"
+access_token_time: "48h"
+refresh_token_time: "128h"
+admin_name: "eer0"
+admin_password: "Illidan4142"
+http_server:
+  address: ":8080"
+  timeout: 4s
+  idle_timeout: 30s
+postgres:
+  host: "postgres"
+  port: 5432
+  user: "greenpoo"
+  password: "my-super-secret-key"
+  dbname: "filmoteka"
